@@ -44,14 +44,17 @@ Material:
     - _DstBlend: 10
     - _DstBlendAlpha: 10
     - _Metallic: 1
+    - _RefractionScale: 10.77
+    - _RefractionSpeed: 0.3
+    - _RefractionStrength: 17.1
     - _Smoothness: 1
     - _Surface: 1
-    - _WaterDepth: 40.7
+    - _WaterDepth: 33.07
     - _ZWrite: 0
     m_Colors:
     - _BaseColor: {r: 0, g: 0.9800038, b: 1, a: 0.9490196}
     - _Color: {r: 0, g: 0.9800038, b: 1, a: 0.9490196}
-    - _Deep: {r: 0.18062478, g: 0.34374195, b: 0.38679248, a: 1}
-    - _Shallow: {r: 0.7028302, g: 1, b: 0.99399436, a: 1}
+    - _Deep: {r: 0.18062472, g: 0.3437419, b: 0.38679242, a: 0.6745098}
+    - _Shallow: {r: 0.75, g: 1, b: 0.9934211, a: 0.29803923}
   m_BuildTextureStacks: []
   m_AllowLocking: 1
