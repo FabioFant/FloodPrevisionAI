@@ -1,4 +1,6 @@
-## 🚀 What FloodPrevisionAI Does
+![logo](assets/logo.png)
+
+## 🚀 FloodPrevisionAI
 
 🌊 FloodPrevisionAI is a cutting-edge research and demonstration tool that simulates flood scenarios in a virtual 3D environment and leverages AI to forecast flood events before they happen. By combining realistic water dynamics with an intelligent neural network, the project allows users to explore how changes in terrain, weather inputs, and sensor configurations impact flood risk. Whether you’re a hydrologist, urban planner, educator, or AI enthusiast, FloodPrevisionAI offers an interactive playground to:
 
