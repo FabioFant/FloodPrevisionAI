@@ -28,7 +28,6 @@ git clone https://github.com/FabioFant/FloodPrevisionAI.git
 ## 📚 Project Structure
 
 ```
-
 FloodPrevisionAI/
 ├── Assets/
 │   ├── Scenes/      # Main flood sim scene
@@ -36,5 +35,4 @@ FloodPrevisionAI/
 │   └── Shaders/     # Water & terrain shaders
 ├── Analysis/        # Notebooks for post-run data dives
 └── README.md        # You are here!
-
 ```
