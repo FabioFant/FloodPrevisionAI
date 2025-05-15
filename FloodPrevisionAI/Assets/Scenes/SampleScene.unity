@@ -278,8 +278,8 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 330585543}
   serializedVersion: 2
-  m_LocalRotation: {x: 0.42209354, y: -0.02255279, z: 0.010482804, w: 0.9062111}
-  m_LocalPosition: {x: -756.4131, y: 1194.7831, z: -748.821}
+  m_LocalRotation: {x: 0.17555013, y: -0.6762423, z: 0.17087352, w: 0.6947523}
+  m_LocalPosition: {x: 2165.5483, y: 1247.3279, z: 121.77409}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -862,7 +862,7 @@ Transform:
   m_GameObject: {fileID: 2118501097}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -712.1, y: 421, z: 231}
+  m_LocalPosition: {x: -712.1, y: 781, z: 231}
   m_LocalScale: {x: 317.6, y: 1, z: 215.2}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -882,8 +882,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   changeDelay: 3
   animDuration: 1
-  minHeight: 130
-  maxHeight: 750
+  MINHEIGHT: 30
+  MAXHEIGHT: 450
   animCurve:
     serializedVersion: 2
     m_Curve:
@@ -908,6 +908,13 @@ MonoBehaviour:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
+  animTimer: 0
+  terrainSaturation: 0
+  decrementSpeed: 0.1
+  minHeight: 0
+  maxHeight: 0
+  rainWeight: 0
+  rainWeightPower: 0
 --- !u!1 &11978964370402076
 GameObject:
   m_ObjectHideFlags: 0
