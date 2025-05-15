@@ -1,4 +1,5 @@
 using System.Collections;
+using TMPro;
 using Unity.VisualScripting;
 using UnityEngine;
 
@@ -26,6 +27,15 @@ public class ControlloAcqua : MonoBehaviour
 
     const float terrainSaturationMax = 1f;
     float lastSaturation;
+
+    [Space]
+    [Header("Rain Effect")]
+    [SerializeField] ParticleSystem rainEffect;
+    [SerializeField] float rainIncrement;
+
+    [Space]
+    [Header("UI")]
+    [SerializeField] TMP_Text saturationPercent;
 
     private void Start()
     {
@@ -60,6 +70,9 @@ public class ControlloAcqua : MonoBehaviour
                 terrainSaturation = 0;
             }
         }
+
+        rainEffect.emissionRate = rainIncrement * rainWeightPower;
+        saturationPercent.text = Mathf.Round(terrainSaturation * 100).ToString() + "%";
     }
 
     IEnumerator WaterLoop()
