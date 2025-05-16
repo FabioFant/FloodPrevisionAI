@@ -44,22 +44,27 @@ public class ControlloAcqua : MonoBehaviour
         maxHeight = MAXHEIGHT;
 
         loop = WaterLoop();
-        StartCoroutine(loop);
+        //StartCoroutine(loop);
     }
 
     private void Update()
     {
         // change height window based on saturation
-        if(terrainSaturation != lastSaturation)
+        if(true)
         {
+            /*
             minHeight += (terrainSaturation - lastSaturation) * MINHEIGHT * 5;
             maxHeight += (terrainSaturation - lastSaturation) * MAXHEIGHT;
+            */
+            float targetY = Mathf.Lerp(minHeight, maxHeight, terrainSaturation);
+            transform.position = new Vector3(transform.position.x, Mathf.Lerp(transform.position.y, targetY, Time.deltaTime), transform.position.z);
 
             lastSaturation = terrainSaturation;
         }
 
         // consider rain impact on saturation
         terrainSaturation = Mathf.Min(terrainSaturation + rainWeight * rainWeightPower * Time.deltaTime, terrainSaturationMax);
+        terrainSaturation = Mathf.Max(terrainSaturation, 0f);
 
         // remove saturation over time
         if (terrainSaturation > 0)
