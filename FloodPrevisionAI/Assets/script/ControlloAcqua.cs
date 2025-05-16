@@ -6,56 +6,53 @@ using UnityEngine;
 
 public class ControlloAcqua : MonoBehaviour
 {
-    [SerializeField] float changeDelay = 3f;
-    [SerializeField] float animDuration = 1f;
-    [SerializeField] float MINHEIGHT;
-    [SerializeField] float MAXHEIGHT;
-
-    [Space]
-    [SerializeField] AnimationCurve animCurve;
-    [SerializeField] float animTimer;
     IEnumerator loop;
 
+    [Header("State")]
+    [Range(0.0f, 1.0f)]
+    [SerializeField] public float terrainSaturation; // how much water is in the terrain, high = can't absorb more water
+    [Range(0.0f, 1.0f)]
+    [SerializeField] public float rainIntensity; // velocity for saturation increase when raining
+
     [Space]
-    [SerializeField] public float terrainSaturation;
-    [SerializeField] float decrementSpeed = 2.5f;
+    [Header("Saturation Variables")]
+    [Range(0.0f, 1.0f)]
+    [SerializeField] float saturationIncreaseVelocity; // multiplicative factor for saturation increase, 1 = 100% increase, 0.5 = 50% increase
+    [SerializeField] float saturationDecrease; // water lowering per update
+
+    [Space]
+    [Header("Water Heights")]
     [SerializeField] float minHeight;
     [SerializeField] float maxHeight;
 
     [Space]
-    [SerializeField] public float rainWeight;
-    [Range(0.0f, 1.0f)]
-    [SerializeField] public float rainWeightPower;
+    [Header("Weather Simulation")]
+    [SerializeField] int bufferSize; // how many weather events the buffer can hold
+    [SerializeField] float bias; // how much the weather events are biased towards 0 (1 = uniform distribution, >1 = more events with low values)
+    [SerializeField] float hourDuration; // how long a weather event lasts (1 hour = 1 second)
+    [SerializeField] public List<float> rainBuffer; // buffer that contains all the weather events
 
-    const float terrainSaturationMax = 1f;
-    float lastSaturation;
+    [SerializeField] AnimationCurve rainCurve;
 
     [Space]
-    [Header("Rain Effect")]
+    [Header("Rain Graphic Effect")]
     [SerializeField] ParticleSystem rainEffect;
-    [SerializeField] float rainIncrement;
+    [SerializeField] float rainIncrement; // how much water spawns, only graphic effect
 
     [Space]
     [Header("UI")]
+    [SerializeField] float maxMmPerHour = 60f; // strongest rain = 60 mm/h
     [SerializeField] TMP_Text saturationPercent;
-
-    
-    [Space]
-    [Header("Weather Simulation")]
-    [SerializeField] float hourDuration = 1f;
-    [SerializeField] AnimationCurve rainCurve;
-    [SerializeField] List<float> rainBuffer;
-    [SerializeField] int bufferSize = 5;
-    [Range(0.0f, 1.0f)]
-    [SerializeField] float rainThreshold = 0.5f; //il valore sotto il quale il tempo è considerato senza pioggia
+    [SerializeField] TMP_Text rainIntensityValue;
+    [SerializeField] TMP_Text rainIntensityWord;
+    [SerializeField] TMP_Text previsionValues;
+    [SerializeField] TMP_Text secondsPerHour;
+    [SerializeField] TMP_Text hoursPassed;
 
 
     private void Start()
     {
-        lastSaturation = terrainSaturation;
-        minHeight = MINHEIGHT;
-        maxHeight = MAXHEIGHT;
-
+        secondsPerHour.text = $"1 ora = {hourDuration} secondi";
         loop = RainLoop();
 
         FillBuffer();
@@ -64,89 +61,99 @@ public class ControlloAcqua : MonoBehaviour
 
     private void Update()
     {
-        // change height window based on saturation
-        if(true)
-        {
-            /*
-            minHeight += (terrainSaturation - lastSaturation) * MINHEIGHT * 5;
-            maxHeight += (terrainSaturation - lastSaturation) * MAXHEIGHT;
-            */
-            float targetY = Mathf.Lerp(minHeight, maxHeight, terrainSaturation);
-            transform.position = new Vector3(transform.position.x, Mathf.Lerp(transform.position.y, targetY, Time.deltaTime), transform.position.z);
-
-            lastSaturation = terrainSaturation;
-        }
+        float targetY = Mathf.Lerp(minHeight, maxHeight, terrainSaturation);
+        transform.position = new Vector3(transform.position.x, Mathf.Lerp(transform.position.y, targetY, Time.deltaTime), transform.position.z);
 
         // consider rain impact on saturation
-        terrainSaturation = Mathf.Min(terrainSaturation + rainWeight * rainWeightPower * Time.deltaTime, terrainSaturationMax);
+        terrainSaturation = Mathf.Min(terrainSaturation + rainIntensity * saturationIncreaseVelocity * Time.deltaTime, 1f);
         terrainSaturation = Mathf.Max(terrainSaturation, 0f);
 
         // remove saturation over time
         if (terrainSaturation > 0)
         {
-            terrainSaturation -= decrementSpeed * Time.deltaTime;
+            terrainSaturation -= saturationDecrease * Time.deltaTime;
             if (terrainSaturation < 0)
             {
                 terrainSaturation = 0;
             }
         }
 
-
-        //effetti grafici
-        rainEffect.emissionRate = rainIncrement * rainWeightPower;
+        // graphic
+        rainEffect.emissionRate = rainIncrement * rainIntensity;
         saturationPercent.text = Mathf.Round(terrainSaturation * 100).ToString() + "%";
+
+        float mmPerHour = rainIntensity * maxMmPerHour;
+        rainIntensityValue.text = $"{mmPerHour:0.##} mm/h";
+
+        if(rainIntensity < 0.1f)
+        {
+            rainIntensityWord.text = "Nulla";
+            rainIntensityWord.color = Color.white;
+        }
+        else if (rainIntensity < 0.5f)
+        {
+            rainIntensityWord.text = "Leggera";
+            rainIntensityWord.color = Color.darkCyan;
+        }
+        else if (rainIntensity < 0.8f)
+        {
+            rainIntensityWord.text = "Moderata";
+            rainIntensityWord.color = Color.yellow;
+        }
+        else
+        {
+            rainIntensityWord.text = "Pesante";
+            rainIntensityWord.color = Color.red;
+        }
     }
 
     IEnumerator RainLoop()
     {
-        //loop che determina la variazione di potenza della pioggia nel tempo
+        // loop che determina la variazione di potenza della pioggia nel tempo
+
+        float hours = 0;
         while (true)
         {
+            hoursPassed.text = $"Ore passate: {hours}";
+            UpdatePrevisionUI();
+
             float timer = hourDuration;
             while (timer > 0f)
             {
                 timer-=Time.deltaTime;
-                //la potenza è interpolata tra i due valori nel buffer utilizzando la curva di animazione
-                rainWeightPower = rainBuffer[0] + (rainBuffer[1] - rainBuffer[0]) * rainCurve.Evaluate((hourDuration-timer)/hourDuration);
+                // la potenza è interpolata tra i due valori nel buffer utilizzando la curva di animazione
+                rainIntensity = rainBuffer[0] + (rainBuffer[1] - rainBuffer[0]) * rainCurve.Evaluate((hourDuration-timer)/hourDuration);
                 yield return null;
             }
             rainBuffer.RemoveAt(0);
-            if( rainBuffer.Count < bufferSize) FillBuffer();
+            if(rainBuffer.Count < bufferSize) FillBuffer();
+
+            hours += 1f;
         }
     }
+
+    void UpdatePrevisionUI()
+    {
+        // update the prevision UI with the next 5 values in the buffer
+        previsionValues.text = "";
+        for (int i = 0; i < rainBuffer.Count; i++)
+        {
+            float mmPerHour = rainBuffer[i] * maxMmPerHour;
+            previsionValues.text += $"~{mmPerHour:0.##} mm, ";
+        }
+        previsionValues.text = previsionValues.text.Remove(previsionValues.text.Length - 2);
+    }    
 
     void FillBuffer()
     {
-        //riempie il buffer delle previsioni con piogge casuali
+        // fill the buffer with random values between 0 and 1, biased towards 0
 
-        for (int i = 0; i < bufferSize; i++)
+        for (int i = rainBuffer.Count; i <= bufferSize; i++)
         {
-            float res = Random.Range(0f, 1f); //rain weight power casuale tra 0 e 1
-            //il perlin noise non funzionava ma può essere riprovato per valori più coerenti
-            rainBuffer.Add(res > rainThreshold ? res : 0);
-        }
-    }
-
-
-    //inutilizzato
-    IEnumerator WaterLoop()
-    {
-        while (true)
-        {
-
-            float startHeight = transform.position.y;
-            float newHeight = Random.Range(minHeight, maxHeight);
-            Debug.Log(newHeight);
-            float diff = newHeight - startHeight;
-            animTimer = 0f;
-            while (animTimer < animDuration)
-            {
-                animTimer += Time.deltaTime;
-                transform.position = new Vector3 (transform.position.x, startHeight + diff*animCurve.Evaluate(animTimer/animDuration), transform.position.z);
-                yield return null;
-            }
-            yield return new WaitForSeconds(changeDelay);
-
+            double uniform = UnityEngine.Random.value;
+            double biased = System.Math.Pow(uniform, bias); // bias towards 0
+            biased = (biased < 0) ? 0 : biased;
+            rainBuffer.Add((float)biased);
         }
     }
 }
