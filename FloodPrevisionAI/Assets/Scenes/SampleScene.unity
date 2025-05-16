@@ -6167,7 +6167,7 @@ GameObject:
   - component: {fileID: 2118501098}
   - component: {fileID: 2118501102}
   m_Layer: 0
-  m_Name: Plane
+  m_Name: WaterController
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -6312,8 +6312,37 @@ MonoBehaviour:
   rainWeight: 1
   rainWeightPower: 0
   rainEffect: {fileID: 1598190258}
-  rainIncrement: 100
+  rainIncrement: 700
   saturationPercent: {fileID: 1323835582}
+  hourDuration: 1
+  rainCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 0
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    - serializedVersion: 3
+      time: 1
+      value: 1
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  rainBuffer: []
+  bufferSize: 3
+  chaos: 0.436
+  rainThreshold: 0.5
 --- !u!1 &11978964370402076
 GameObject:
   m_ObjectHideFlags: 0
