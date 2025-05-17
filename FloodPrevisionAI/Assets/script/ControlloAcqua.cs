@@ -29,6 +29,7 @@ public class ControlloAcqua : MonoBehaviour
     [Header("Weather Simulation")]
     [SerializeField] int bufferSize; // how many weather events the buffer can hold
     [SerializeField] float bias; // how much the weather events are biased towards 0 (1 = uniform distribution, >1 = more events with low values)
+    [Range(0.01f, 5.0f)]
     [SerializeField] float hourDuration; // how long a weather event lasts (1 hour = 1 second)
     [SerializeField] public List<float> rainBuffer; // buffer that contains all the weather events
 
@@ -48,6 +49,11 @@ public class ControlloAcqua : MonoBehaviour
     [SerializeField] TMP_Text previsionValues;
     [SerializeField] TMP_Text secondsPerHour;
     [SerializeField] TMP_Text hoursPassed;
+    [SerializeField] TMP_Text AIWarning;
+
+    [SerializeField] GameObject EYE1;
+    [SerializeField] GameObject EYE2;
+
 
 
     private void Start()
@@ -56,6 +62,7 @@ public class ControlloAcqua : MonoBehaviour
         loop = RainLoop();
 
         FillBuffer();
+        PrevisionAI();
         StartCoroutine(loop);
     }
 
@@ -127,7 +134,7 @@ public class ControlloAcqua : MonoBehaviour
             }
             rainBuffer.RemoveAt(0);
             if(rainBuffer.Count < bufferSize) FillBuffer();
-
+            PrevisionAI();
             hours += 1f;
         }
     }
@@ -136,7 +143,7 @@ public class ControlloAcqua : MonoBehaviour
     {
         // update the prevision UI with the next 5 values in the buffer
         previsionValues.text = "";
-        for (int i = 0; i < rainBuffer.Count; i++)
+        for (int i = 0; i < Mathf.Min(rainBuffer.Count,5); i++)
         {
             float mmPerHour = rainBuffer[i] * maxMmPerHour;
             previsionValues.text += $"~{mmPerHour:0.##} mm, ";
@@ -154,6 +161,49 @@ public class ControlloAcqua : MonoBehaviour
             double biased = System.Math.Pow(uniform, bias); // bias towards 0
             biased = (biased < 0) ? 0 : biased;
             rainBuffer.Add((float)biased);
+        }
+    }
+
+    void PrevisionAI()
+    {
+        float maxr = 0;
+        int ix = 3;
+        for(int i = 3; i < Mathf.Min(rainBuffer.Count, 5); i++)
+        {
+            if (rainBuffer[i] > maxr) ix = i;
+            maxr = Mathf.Max(maxr, rainBuffer[i]);
+        }
+
+        if (maxr < 0.1f)
+        {
+            AIWarning.text = "Sicuro";
+            AIWarning.color = Color.white;
+        }
+        else if (maxr < 0.5f)
+        {
+            AIWarning.text = "Poco Pericoloso";
+            AIWarning.color = Color.darkCyan;
+        }
+        else if (maxr < 0.8f)
+        {
+            AIWarning.text = "Pericoloso";
+            AIWarning.color = Color.yellow;
+        }
+        else
+        {
+            AIWarning.text = "Molto Pericoloso";
+            AIWarning.color = Color.red;
+        }
+
+        if(ix == 3)
+        {
+            EYE1.SetActive(true);
+            EYE2.SetActive(false);
+        }
+        else
+        {
+            EYE1.SetActive(false);
+            EYE2.SetActive(true);
         }
     }
 }
